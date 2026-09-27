@@ -47,6 +47,11 @@ def create_memo(memo: MemoIn) -> dict:
         conn.commit()
         return {"id": cur.lastrowid, "title": memo.title, "body": memo.body}
 
+@app.get("/memos/search")
+def search_memos(q: str, sort: str = "id") -> list[dict]:
+    with closing(get_conn()) as conn:
+        rows = conn.execute(f"SELECT id, title, body FROM memos ORDER BY {sort}").fetchall()
+    return [dict(row) for row in rows if q in row["title"] or q in row["body"]]
 
 @app.get("/memos/{memo_id}")
 def get_memo(memo_id: int) -> dict:
